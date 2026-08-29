@@ -11,25 +11,29 @@ NOTAS DE CONFIGURACIÓN Y MIGRACIÓN A TRAGALERO (SUPABASE & DOMINIO)
    - Se actualizó la clave de API pública (Anon Key).
    - Se actualizó el archivo `docs/CNAME` a: tragalero.com
 
-2. OBSERVACIONES Y RECOMENDACIONES / CHECKLIST:
-   --------------------------------------------
-   - Esquemáticas de Base de Datos en Supabase (Tragalero):
-     Asegúrate de que la base de datos de Supabase de Tragalero contenga las mismas tablas y esquemas necesarios para el funcionamiento del sistema:
-     * `menutech_menus`
-     * `menutech_orders`
-     * `menutech_forms` y `menutech_forms_respuestas`
-     * `menutech_footers`
-     * `galeria`
-     * `promos`
-     * `profiles`
-     * `physical_menus`
-     * `tickets` / `assets` (si se utilizan impresoras/tickets)
+2. SOLUCIÓN AL ACCESO DENEGADO Y PANEL DE ADMINISTRACIÓN:
+   -------------------------------------------------------
+   Al cambiar a la base de datos de Supabase de Tragalero, la tabla `profiles` está vacía o el usuario con el que iniciaste sesión no tiene asignado el rol de `admin` en la base de datos.
 
-   - Políticas RLS (Row Level Security):
-     Recuerda habilitar las políticas RLS correspondientes en Supabase para permitir la lectura pública de menús, galerías, promociones y la inserción pública de pedidos (`menutech_orders`) y respuestas de formularios (`menutech_forms_respuestas`).
-     En la carpeta `docs/` se encuentran archivos SQL auxiliares como `fix_public_orders_rls.sql`, `fix_orders_schema.sql`, etc., en caso de requerir ajustar permisos.
+   Para solucionarlo y activar el panel de admin / control de cuentas / generación de menús:
+   1. Ve a tu consola de Supabase de Tragalero: https://supabase.com/dashboard/project/jqmmzufomzcsyzdskxze
+   2. Ve al editor de tablas (Table Editor) -> tabla `profiles`.
+   3. Ubica la fila correspondiente a tu usuario (o crea la fila con tu `id` de Auth).
+   4. En la columna `role`, cambia el valor a `admin` (o `developer`).
+   5. Guarda los cambios e inicia sesión nuevamente (o recarga la página).
 
-   - Dominio y CNAME:
-     Para que GitHub Pages o el servidor de hosting apunte correctamente a `tragalero.com`, asegúrate de que en la configuración de DNS de tu proveedor de dominio (DNS registrar) el registro CNAME / A apunte a los servidores correspondientes.
+3. CHECKLIST Y ESQUEMAS DE BASE DE DATOS EN SUPABASE:
+   --------------------------------------------------
+   Asegúrate de ejecutar los scripts SQL ubicados en la carpeta `docs/` en la consola de Supabase de Tragalero si aún no has creado las tablas o políticas RLS:
+   - `docs/fix_admin_permissions.sql`
+   - `docs/fix_public_orders_rls.sql`
+   - `docs/fix_orders_schema.sql`
+   - `docs/web_templates.sql`
+   - `docs/physical_menus_schema.sql`
+   - `docs/restaurants_schema.sql`
+
+4. DOMINIO Y CNAME:
+   ----------------
+   Asegúrate de configurar los registros A / CNAME en tu proveedor de DNS para `tragalero.com` dirigidos a GitHub Pages o tu hosting.
 
 ========================================================================
