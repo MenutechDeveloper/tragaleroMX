@@ -1,6 +1,6 @@
 const MT_UI_CONFIG = {
-    url: "https://eemqyrysdgasfjlitads.supabase.co",
-    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlbXF5cnlzZGdhc2ZqbGl0YWRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MjA0NDUsImV4cCI6MjA4OTI5NjQ0NX0.UiyZLqhXSQ1Z_FoL006PDrDYKXbr_pxCOugYTulhdPY"
+    url: "https://jqmmzufomzcsyzdskxze.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxbW16dWZvbXpjc3l6ZHNreHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NDE1NTgsImV4cCI6MjA4ODMxNzU1OH0.mAd28JHZmLZGLd4Z3r59SgtSdeEpMyZd_WJdrD381Vs"
 };
 
 /**

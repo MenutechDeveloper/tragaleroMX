@@ -1,0 +1,35 @@
+========================================================================
+NOTAS DE CONFIGURACIÓN Y MIGRACIÓN A TRAGALERO (SUPABASE & DOMINIO)
+========================================================================
+
+1. CAMBIOS REALIZADOS:
+   -------------------
+   - Se actualizaron las credenciales de Supabase en los archivos centrales de configuración:
+     * `docs/config.js`
+     * `docs/menutechUI.js`
+   - Se actualizó la URL del proyecto a: https://jqmmzufomzcsyzdskxze.supabase.co
+   - Se actualizó la clave de API pública (Anon Key).
+   - Se actualizó el archivo `docs/CNAME` a: tragalero.com
+
+2. OBSERVACIONES Y RECOMENDACIONES / CHECKLIST:
+   --------------------------------------------
+   - Esquemáticas de Base de Datos en Supabase (Tragalero):
+     Asegúrate de que la base de datos de Supabase de Tragalero contenga las mismas tablas y esquemas necesarios para el funcionamiento del sistema:
+     * `menutech_menus`
+     * `menutech_orders`
+     * `menutech_forms` y `menutech_forms_respuestas`
+     * `menutech_footers`
+     * `galeria`
+     * `promos`
+     * `profiles`
+     * `physical_menus`
+     * `tickets` / `assets` (si se utilizan impresoras/tickets)
+
+   - Políticas RLS (Row Level Security):
+     Recuerda habilitar las políticas RLS correspondientes en Supabase para permitir la lectura pública de menús, galerías, promociones y la inserción pública de pedidos (`menutech_orders`) y respuestas de formularios (`menutech_forms_respuestas`).
+     En la carpeta `docs/` se encuentran archivos SQL auxiliares como `fix_public_orders_rls.sql`, `fix_orders_schema.sql`, etc., en caso de requerir ajustar permisos.
+
+   - Dominio y CNAME:
+     Para que GitHub Pages o el servidor de hosting apunte correctamente a `tragalero.com`, asegúrate de que en la configuración de DNS de tu proveedor de dominio (DNS registrar) el registro CNAME / A apunte a los servidores correspondientes.
+
+========================================================================
