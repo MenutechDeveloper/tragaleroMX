@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Menutech Buttons — Custom Editor</title>
+<link rel="icon" type="image/png" href="https://menutech.services/assets/img/logomt.png">
+<link rel="shortcut icon" href="https://menutech.services/assets/img/logomt.png">
+<script src="https://menutechdeveloper.github.io/libreria/menutechlibrary.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
+
+:root {
+    --orange: #ff9533;
+    --bg: #fffcf0;
+    --card: #ffffff;
+    --input: #fffef5;
+    --text: #1a1c1e;
+    --text-dim: #4a5568;
+    --border: #f8e8d8;
+    --success: #059669;
+    --error: #dc2626;
+}
+
+body.dark-mode {
+    --bg: #121418;
+    --card: #1c1f26;
+    --input: #242933;
+    --text: #f8fafc;
+    --text-dim: #94a3b8;
+    --border: #2d333f;
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 36px;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(circle at 0% 0%, rgba(255, 149, 51, 0.1) 0%, transparent 40%), radial-gradient(circle at 100% 100%, rgba(255, 149, 51, 0.05) 0%, transparent 40%);
+}
+
+.container { max-width: 1100px; margin: 0 auto; }
+h1 {
+    text-align: center;
+    margin: 0 0 22px;
+    font-size: 2.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+}
+p.lead { text-align: center; color: var(--text-dim); margin: 6px 0 28px; font-weight: 500; }
+.design-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.card {
+    background: var(--card);
+    border-radius: 32px;
+    padding: 30px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+.card:hover { transform: translateY(-5px); }
+
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--text); }
+
+.controls { display: flex; gap: 8px; align-items: center; }
+.controls label { display: flex; gap: 8px; align-items: center; font-size: 0.8rem; font-weight: 600; color: var(--text-dim); cursor: pointer; }
+
+.switch { width: 44px; height: 24px; background: #ccc; border-radius: 20px; position: relative; transition: .4s; cursor: pointer; }
+.switch::after { content: ''; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: all .22s ease; }
+
+input[type=checkbox] { display: none; }
+input[type=checkbox]:checked + .switch { background: var(--orange); }
+input[type=checkbox]:checked + .switch::after { transform: translateX(20px); }
+
+.pair { display: flex; flex-direction: row; align-items: center; gap: 12px; padding-top: 6px; flex-wrap: wrap; justify-content: center; }
+@media (max-width: 768px) {
+  .pair {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.btn {
+    display: inline-flex; align-items: center; gap: 12px; white-space: nowrap;
+    border: none; text-decoration: none; font-weight: 700; cursor: pointer;
+    overflow: hidden; border-radius: 12px; transition: all .36s cubic-bezier(.2,.9,.2,1);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    padding: 12px 18px; min-height: 48px;
+}
+.pair.anim-enabled .btn { width: 56px; padding-left: 17px; padding-right: 17px; }
+.pair:not(.anim-enabled) .btn { width: auto; }
+.btn .btn-text { opacity: 1; transition: opacity .32s ease, margin .32s ease; margin-left: 0; font-size: 0.9rem; }
+.pair.anim-enabled .btn .btn-text { opacity: 0; margin-left: 0; }
+.pair.anim-enabled .btn:hover .btn-text { opacity: 1; margin-left: 6px; }
+.icon {
+    width: 26px; height: 26px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .32s ease;
+    background: rgba(0,0,0,0.1);
+    border-radius: 6px;
+    padding: 2px;
+}
+.icon svg { width: 100%; height: 100%; }
+
+.pair.anim-enabled .btn:hover .icon { transform: translateX(6px); }
+
+/* design 1 */
+.design-1 .btn-order { border-radius: 26px; background: linear-gradient(135deg, #e63946, #ff6b6b); color: #fff; }
+.design-1 .btn-reserve { border-radius: 26px; background: linear-gradient(135deg, #009688, #26a69a); color: #fff; }
+.design-1 .pair.anim-enabled .btn:hover { width: auto; padding-right: 22px; }
+
+/* design 2 */
+.design-2 .btn-order { background: #f2a04a; color: #1b1b1b; border-radius: 8px; }
+.design-2 .btn-reserve { background: #2f4854; color: #fff; border-radius: 8px; }
+.design-2 .pair.anim-enabled .btn:hover { width: auto; padding-right: 22px; transform: translateY(-3px); }
+
+/* design 3 */
+.design-3 .btn { background: transparent; color: var(--text); border-radius: 10px; border: 2px solid var(--border); box-shadow: none; padding: 10px 14px; }
+.design-3 .btn-order { border-color: #ffd166; }
+.design-3 .btn-reserve { border-color: #8ecae6; }
+.design-3 .btn:hover { background: rgba(0,0,0,0.02); transform: translateY(-4px); border-color: var(--text); }
+.design-3 .pair.anim-enabled .btn:hover { width: auto; padding-right: 18px; }
+
+body.dark-mode .design-3 .btn:hover { background: rgba(255,255,255,0.05); }
+
+.note { color: var(--text-dim); font-size: 0.8rem; margin-top: 15px; font-weight: 500; }
+
+.config-panel {
+    margin-top: 20px; padding: 20px; background: var(--input); border-radius: 20px;
+    font-size: 0.85rem; border: 1px solid var(--border);
+}
+.config-panel strong { display: block; margin-bottom: 10px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.7rem; }
+.config-panel label { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; }
+
+.config-panel input[type=color] {
+    width: 38px; height: 38px; border: none; border-radius: 12px;
+    background: var(--card); cursor: pointer; padding: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.config-panel input[type=text] {
+    width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-size: 0.85rem; transition: 0.3s;
+    margin-bottom: 10px;
+}
+.config-panel input[type=text]:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255, 149, 51, 0.1); }
+
+.copy-btn {
+    width: 100%; margin-top: 15px; background: var(--orange); border: none;
+    padding: 14px; border-radius: 14px; cursor: pointer; color: #000;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    transition: 0.3s;
+}
+.copy-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 149, 51, 0.3); }
+
+@media(max-width:1024px) { .design-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:768px) { .design-grid { grid-template-columns: 1fr; } }
+
+/* popup */
+.copy-popup {
+    position: fixed; top: 30px; right: 30px; background: var(--success);
+    color: #fff; padding: 16px 24px; border-radius: 20px; font-weight: 700;
+    opacity: 0; transform: translateY(-20px); transition: .35s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 9999;
+}
+.copy-popup.show { opacity: 1; transform: translateY(0); }
+
+#user-display-pill #user-name, #user-display-pill #user-role-label { color: var(--text); transition: color 0.3s; }
+#user-display-pill.admin-glow {
+    background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%) !important;
+    background-size: 400% 400% !important; animation: foil-shine 25s ease infinite; border: none !important;
+}
+#user-display-pill.admin-glow #user-name, #user-display-pill.admin-glow #user-role-label { color: #3e2b14 !important; }
+
+#user-display-pill.dev-glow {
+    background: linear-gradient(135deg, #70706F 0%, #E9E9E7 20%, #70706F 40%, #E9E9E7 60%, #70706F 80%, #E9E9E7 100%) !important;
+    background-size: 400% 400% !important; animation: foil-shine 25s ease infinite; border: none !important;
+}
+#user-display-pill.dev-glow #user-name, #user-display-pill.dev-glow #user-role-label { color: #1e293b !important; }
+
+#user-display-pill.owner-glow {
+    background: #000 !important;
+    background-image: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 20%, transparent 40%, rgba(255,255,255,0.1) 60%, transparent 80%, rgba(255,255,255,0.1) 100%) !important;
+    background-size: 400% 400% !important; animation: foil-shine 25s ease infinite; border: none !important;
+}
+#user-display-pill.owner-glow #user-name, #user-display-pill.owner-glow #user-role-label { color: #fff !important; }
+
+@keyframes foil-shine { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+.pill-menu {
+    position: absolute; top: calc(100% + 12px); right: 0; background: var(--card);
+    border: 1px solid var(--border); border-radius: 24px; padding: 12px;
+    min-width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); opacity: 0;
+    transform: translateY(10px); pointer-events: none; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 6000;
+}
+#user-display-pill.active .pill-menu { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.pill-menu-item {
+    padding: 12px 18px; border-radius: 14px; font-size: 0.85rem; font-weight: 600;
+    color: var(--text); display: flex; align-items: center; gap: 10px; cursor: pointer;
+    transition: 0.2s; text-decoration: none;
+}
+.pill-menu-item:hover { background: rgba(255, 149, 51, 0.1); color: var(--orange); }
+.pill-menu-item.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+
+#top-nav { position: fixed; top: 24px; left: 24px; right: 24px; display: flex; align-items: center; justify-content: space-between; z-index: 5000; }
+.btn-panel-top { background: var(--orange); color: #000; border: none; padding: 12px 28px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: 0.4s; letter-spacing: 1.5px; box-shadow: 0 8px 25px rgba(255, 149, 51, 0.3); text-transform: uppercase; }
+.btn-panel-top:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(255, 149, 51, 0.4); }
+
+.theme-switch { width: 50px; height: 50px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.4s; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+.theme-switch:hover { transform: translateY(-2px); border-color: var(--orange); }
+.theme-switch svg { width: 24px; height: 24px; transition: 0.4s; }
+.sun-icon { color: var(--orange); }
+.moon-icon { color: #8b5cf6; display: none; }
+body.dark-mode .sun-icon { display: none; }
+body.dark-mode .moon-icon { display: block; }
+
+#user-display-pill { background: var(--card); backdrop-filter: blur(20px); padding: 8px 24px; border-radius: 40px; border: 1.5px solid var(--border); display: none; align-items: center; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); cursor: pointer; position: relative; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); min-width: 220px; justify-content: flex-start; }
+#user-display-pill:hover { transform: translateY(-2px); border-color: var(--orange); }
+.pill-info { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
+</style>
+</head>
+<body>
+<div class="copy-popup" id="copypopup">Code copied</div>
+
+<div id="top-nav">
+    <div id="nav-left"><button class="btn-panel-top" onclick="location.href='index.html'">PANEL</button></div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="theme-switch" id="theme-toggle">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+        <div id="user-display-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; height:20px; color: inherit;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <div class="pill-info">
+                <div id="user-name" style="font-weight: 800; font-size: 0.85rem; font-family: 'Outfit', sans-serif;">&nbsp;</div>
+                <div id="user-role-label" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">&nbsp;</div>
+            </div>
+            <div class="pill-menu">
+                <a href="index.html" class="pill-menu-item">Home</a>
+                <div class="pill-menu-item danger">Logout</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+  <img src="https://menutech.services/assets/img/logomt.png" style="width: 100%; max-width: 320px; height: auto; margin: 60px auto 40px auto; display: block; filter: drop-shadow(0 10px 20px rgba(255,149,51,0.15));" alt="Menutech Logo">
+  <div class="design-grid">
+
+    <div class="card design-1">
+      <div class="card-header">
+        <div class="card-title">Modern</div>
+        <div class="controls"><label><input type="checkbox" class="toggle-anim" data-pair="pair-1" checked><span class="switch"></span></label></div>
+      </div>
+      <div class="pair pair-1 anim-enabled">
+        <span class="glf-button btn btn-order" data-glf-cuid="52230bb2-0d10-491a-80a6-3c5603e87152" data-glf-ruid="010d211a-aff0-4aa2-b4d0-739fce78437a">
+          <i class="icon menutech-mago" id="d1-icon1"></i><span class="btn-text">See MENU & Order Now!</span>
+        </span>
+        <span class="glf-button btn btn-reserve reservation" data-glf-cuid="52230bb2-0d10-491a-80a6-3c5603e87152" data-glf-ruid="010d211a-aff0-4aa2-b4d0-739fce78437a" data-glf-reservation="true">
+          <i class="icon menutech-mago" id="d1-icon2"></i><span class="btn-text">Table Reservation</span>
+        </span>
+      </div>
+      <div class="config-panel">
+        <strong>Menutech Color</strong><br>
+        <input type="color" id="d1-ic" value="#ffffff"><br><br>
+        <strong>Colors</strong><br>
+        Order: <input type="color" id="d1-o1" value="#e63946"> <input type="color" id="d1-o2" value="#ff6b6b">
+        Text: <input type="color" id="d1-text1" value="#ffffff"><br>
+        Reservation: <input type="color" id="d1-r1" value="#009688"> <input type="color" id="d1-r2" value="#26a69a">
+        Text: <input type="color" id="d1-text2" value="#ffffff"><br><br>
+        <strong>Links</strong><br>
+        CUID: <input type="text" id="d1-cuid" value="52230bb2-0d10-491a-80a6-3c5603e87152">
+        RUID: <input type="text" id="d1-ruid" value="010d211a-aff0-4aa2-b4d0-739fce78437a">
+        <button class="copy-btn" data-target="1">Copy Code</button>
+      </div>
+    </div>
+
+    <div class="card design-2">
+      <div class="card-header">
+        <div class="card-title">Classic</div>
+        <div class="controls"><label><input type="checkbox" class="toggle-anim" data-pair="pair-2" checked><span class="switch"></span></label></div>
+      </div>
+      <div class="pair pair-2 anim-enabled">
+        <span class="glf-button btn btn-order" data-glf-cuid="52230bb2-0d10-491a-80a6-3c5603e87152" data-glf-ruid="010d211a-aff0-4aa2-b4d0-739fce78437a">
+          <i class="icon menutech-mago" id="d2-icon1"></i><span class="btn-text">See MENU & Order Now!</span>
+        </span>
+        <span class="glf-button btn btn-reserve reservation" data-glf-cuid="52230bb2-0d10-491a-80a6-3c5603e87152" data-glf-ruid="010d211a-aff0-4aa2-b4d0-739fce78437a" data-glf-reservation="true">
+          <i class="icon menutech-mago" id="d2-icon2"></i><span class="btn-text">Table Reservation</span>
+        </span>
+      </div>
+      <div class="config-panel">
+        <strong>Menutech Color</strong><br>
+        <input type="color" id="d2-ic" value="#ffffff"><br><br>
+        <strong>Colors</strong><br>
+        Order: <input type="color" id="d2-o" value="#f2a04a">
+        Text: <input type="color" id="d2-text1" value="#1b1b1b"><br>
+        Reservation: <input type="color" id="d2-r" value="#2f4854">
+        Text: <input type="color" id="d2-text2" value="#ffffff"><br><br>
+        <strong>Links</strong><br>
+        CUID: <input type="text" id="d2-cuid" value="52230bb2-0d10-491a-80a6-3c5603e87152">
+        RUID: <input type="text" id="d2-ruid" value="010d211a-aff0-4aa2-b4d0-739fce78437a">
+        <button class="copy-btn" data-target="2">Copy Code</button>
+      </div>
+    </div>
+
+    <div class="card design-3">
+      <div class="card-header">
+        <div class="card-title">Outline</div>
+        <div class="controls"><label><input type="checkbox" class="toggle-anim" data-pair="pair-3" checked><span class="switch"></span></label></div>
+      </div>
+      <div class="pair pair-3 anim-enabled">
+        <span class="glf-button btn btn-order" data-glf-cuid="52230bb2-0d10-491a-80a6-3c5603e87152" data-glf-ruid="010d211a-aff0-4aa2-b4d0-739fce78437a">
+          <i class="icon menutech-mago" id="d3-icon1"></i><span class="btn-text">See MENU & Order Now!</span>
+        </span>
+        <span class="glf-button btn btn-reserve reservation" data-glf-cuid="52230bb2-0d10-491a-80a6-3c5603e87152" data-glf-ruid="010d211a-aff0-4aa2-b4d0-739fce78437a" data-glf-reservation="true">
+          <i class="icon menutech-mago" id="d3-icon2"></i><span class="btn-text">Table Reservation</span>
+        </span>
+      </div>
+      <div class="config-panel">
+        <strong>Menutech Color</strong><br>
+        <input type="color" id="d3-ic" value="#ffffff"><br><br>
+        <strong>Colors</strong><br>
+        Order: <input type="color" id="d3-o" value="#ffd166">
+        Text: <input type="color" id="d3-text1" value="#ffffff"><br>
+        Reservation: <input type="color" id="d3-r" value="#8ecae6">
+        Text: <input type="color" id="d3-text2" value="#ffffff"><br><br>
+        <strong>Links</strong><br>
+        CUID: <input type="text" id="d3-cuid" value="52230bb2-0d10-491a-80a6-3c5603e87152">
+        RUID: <input type="text" id="d3-ruid" value="010d211a-aff0-4aa2-b4d0-739fce78437a">
+        <button class="copy-btn" data-target="3">Copy Code</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+    import { MT_CONFIG } from './config.js';
+    import { supabase as sb } from './supabase.js';
+    let user = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        initTheme();
+        checkSession();
+    });
+
+    async function checkSession() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
+            user = session.user;
+            const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+            const pill = document.getElementById('user-display-pill');
+            const nameEl = document.getElementById('user-name'), roleEl = document.getElementById('user-role-label');
+
+            if (profile) {
+                const role = (profile.role || 'user').trim().toUpperCase();
+                nameEl.textContent = profile.username || user.email.split('@')[0];
+                roleEl.textContent = profile.role || 'user';
+
+                if (role === 'ADMIN') pill.classList.add('admin-glow');
+                else if (role === 'DEVELOPER') pill.classList.add('dev-glow');
+                else pill.classList.add('owner-glow');
+            }
+            pill.style.display = 'flex';
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+
+    function initTheme() {
+        const toggle = document.getElementById('theme-toggle');
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') document.body.classList.add('dark-mode');
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+    }
+
+    window.logout = async () => { await sb.auth.signOut(); location.href = 'index.html'; };
+
+    const pill = document.getElementById('user-display-pill');
+    pill.onclick = (e) => { e.stopPropagation(); pill.classList.toggle('active'); };
+    document.addEventListener('click', () => pill.classList.remove('active'));
+    document.querySelector('.pill-menu-item.danger').onclick = (e) => { e.stopPropagation(); window.logout(); };
+</script>
+
+<script src="botones.js" defer></script>
+<script>
+document.querySelectorAll('.toggle-anim').forEach(cb=>{
+  const pair=document.querySelector('.'+cb.dataset.pair);
+  cb.checked?pair.classList.add('anim-enabled'):pair.classList.remove('anim-enabled');
+  cb.addEventListener('change',()=>pair.classList.toggle('anim-enabled',cb.checked));
+});
+
+function loadMenuTechIcon(el,color){
+  fetch("https://menutechdeveloper.github.io/libreria/icons/mago.svg")
+    .then(r=>r.text())
+    .then(svg=>{
+      svg=svg.replace(/fill="[^"]*"/g,'fill="currentColor"');
+      svg = svg.replace(/<svg([^>]*)>/i, '<svg$1 width="22" height="22">');
+      el.innerHTML=svg;
+      el.style.color=color;
+    });
+}
+
+['1','2','3'].forEach(id=>{
+  loadMenuTechIcon(document.getElementById(`d${id}-icon1`),document.getElementById(`d${id}-ic`).value);
+  loadMenuTechIcon(document.getElementById(`d${id}-icon2`),document.getElementById(`d${id}-ic`).value);
+});
+
+document.querySelectorAll('input[id$="-ic"]').forEach(input=>{
+  input.addEventListener('input',()=>{
+    const id=input.id.split('-')[0].replace('d','');
+    loadMenuTechIcon(document.getElementById(`d${id}-icon1`),input.value);
+    loadMenuTechIcon(document.getElementById(`d${id}-icon2`),input.value);
+  });
+});
+
+function setGradient(btn, c1, c2, text){btn.style.background=`linear-gradient(135deg,${c1},${c2})`;btn.style.color=text;}
+function setFlat(btn, c, text){btn.style.background=c;btn.style.color=text;}
+function setOutline(btn, border,text){btn.style.borderColor=border;btn.style.color=text;}
+
+['1','2','3'].forEach(id=>{
+  document.querySelector(`[data-target="${id}"]`).addEventListener('click',()=>{
+    const card=document.querySelector(`.design-${id}`);
+    const cuid=card.querySelector(`#d${id}-cuid`).value;
+    const ruid=card.querySelector(`#d${id}-ruid`).value;
+    const iconColor = card.querySelector(`#d${id}-ic`).value;
+
+    let orderButton, reservationButton;
+
+    if (id === '1') {
+      const o1 = card.querySelector('#d1-o1').value;
+      const o2 = card.querySelector('#d1-o2').value;
+      const t1 = card.querySelector('#d1-text1').value;
+      const r1 = card.querySelector('#d1-r1').value;
+      const r2 = card.querySelector('#d1-r2').value;
+      const t2 = card.querySelector('#d1-text2').value;
+      orderButton = `<menutech-orders cuid="${cuid}" ruid="${ruid}" color="${iconColor}" background="linear-gradient(135deg, ${o1}, ${o2})" textColor="${t1}"></menutech-orders>`;
+      reservationButton = `<menutech-reservations cuid="${cuid}" ruid="${ruid}" color="${iconColor}" background="linear-gradient(135deg, ${r1}, ${r2})" textColor="${t2}"></menutech-reservations>`;
+    } else if (id === '2') {
+      const o = card.querySelector('#d2-o').value;
+      const t1 = card.querySelector('#d2-text1').value;
+      const r = card.querySelector('#d2-r').value;
+      const t2 = card.querySelector('#d2-text2').value;
+      orderButton = `<menutech-orders cuid="${cuid}" ruid="${ruid}" color="${iconColor}" background="${o}" textColor="${t1}"></menutech-orders>`;
+      reservationButton = `<menutech-reservations cuid="${cuid}" ruid="${ruid}" color="${iconColor}" background="${r}" textColor="${t2}"></menutech-reservations>`;
+    } else { // id === '3'
+      const o = card.querySelector('#d3-o').value;
+      const t1 = card.querySelector('#d3-text1').value;
+      const r = card.querySelector('#d3-r').value;
+      const t2 = card.querySelector('#d3-text2').value;
+      orderButton = `<menutech-orders cuid="${cuid}" ruid="${ruid}" color="${iconColor}" border-color="${o}" textColor="${t1}"></menutech-orders>`;
+      reservationButton = `<menutech-reservations cuid="${cuid}" ruid="${ruid}" color="${iconColor}" border-color="${r}" textColor="${t2}"></menutech-reservations>`;
+    }
+
+    const scriptTag='<'+'script src="https://www.fbgcdn.com/embedder/js/ewm2.js" defer async></'+'script>';
+    const htmlToCopy=`${orderButton}\n${reservationButton}\n${scriptTag}`;
+
+    navigator.clipboard.writeText(htmlToCopy).then(()=>{
+      const p=document.getElementById("copypopup");
+      p.classList.add("show");
+      setTimeout(()=>p.classList.remove("show"),2000);
+    });
+  });
+});
+
+document.querySelectorAll('input[type=color]').forEach(input=>{
+  input.addEventListener('input',()=>{
+    const id=input.id;
+    if(id.startsWith('d1-')){
+      const card=document.querySelector('.design-1');
+      const order=card.querySelector('.btn-order'),reserve=card.querySelector('.btn-reserve');
+      setGradient(order,card.querySelector('#d1-o1').value,card.querySelector('#d1-o2').value,card.querySelector('#d1-text1').value);
+      setGradient(reserve,card.querySelector('#d1-r1').value,card.querySelector('#d1-r2').value,card.querySelector('#d1-text2').value);
+    }
+    if(id.startsWith('d2-')){
+      const card=document.querySelector('.design-2');
+      const order=card.querySelector('.btn-order'),reserve=card.querySelector('.btn-reserve');
+      setFlat(order,card.querySelector('#d2-o').value,card.querySelector('#d2-text1').value);
+      setFlat(reserve,card.querySelector('#d2-r').value,card.querySelector('#d2-text2').value);
+    }
+    if(id.startsWith('d3-')){
+      const card=document.querySelector('.design-3');
+      const order=card.querySelector('.btn-order'),reserve=card.querySelector('.btn-reserve');
+      setOutline(order,card.querySelector('#d3-o').value,card.querySelector('#d3-text1').value);
+      setOutline(reserve,card.querySelector('#d3-r').value,card.querySelector('#d3-text2').value);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

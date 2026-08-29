@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+if (window !== window.top) {
+  window.top.location.href = window.location.href;
+}
+</script>
+
+<title>Generador QR — Menutech</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
+
+  :root {
+      --orange: #ff9533;
+      --bg: #fffcf0;
+      --card: #ffffff;
+      --input: #fffef5;
+      --text: #1a1c1e;
+      --text-dim: #4a5568;
+      --border: #f8e8d8;
+      --success: #059669;
+      --error: #dc2626;
+  }
+
+  body.dark-mode {
+      --bg: #121418;
+      --card: #1c1f26;
+      --input: #242933;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --border: #2d333f;
+  }
+
+  *{box-sizing:border-box;}
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background 0.3s, color 0.3s; margin:0; padding:32px; }
+
+  .bg-mesh { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 100% 0%, rgba(255, 149, 51, 0.1) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.05) 0%, transparent 40%); }
+
+  #top-nav { position: fixed; top: 24px; left: 24px; right: 24px; display: flex; align-items: center; justify-content: space-between; z-index: 5000; pointer-events: none; }
+  #top-nav > * { pointer-events: auto; }
+
+  /* Premium User Pill */
+  #user-display-pill {
+      background: var(--card); backdrop-filter: blur(20px); padding: 8px 24px; border-radius: 40px; border: 1.5px solid var(--border);
+      display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); cursor: pointer; position: relative;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); min-width: 220px; justify-content: flex-start;
+  }
+  #user-display-pill:hover { transform: translateY(-2px); border-color: var(--orange); box-shadow: 0 15px 45px rgba(255,149,51,0.15); }
+
+  #user-display-pill.admin-glow {
+      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
+      background-size: 400% 400%; animation: foil-shine 25s ease infinite; border: none !important;
+  }
+  #user-display-pill.admin-glow #user-name, #user-display-pill.admin-glow #user-role-label { color: #3e2b14 !important; }
+
+  #user-display-pill.dev-glow {
+      background: linear-gradient(135deg, #70706F 0%, #E9E9E7 20%, #70706F 40%, #E9E9E7 60%, #70706F 80%, #E9E9E7 100%);
+      background-size: 400% 400%; animation: foil-shine 25s ease infinite; border: none !important;
+  }
+  #user-display-pill.dev-glow #user-name, #user-display-pill.dev-glow #user-role-label { color: #1e293b !important; }
+
+  @keyframes foil-shine { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+  .pill-info { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
+  #user-name { font-weight: 800; font-size: 0.85rem; font-family: 'Outfit', sans-serif; }
+  #user-role-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .pill-menu { position: absolute; top: calc(100% + 12px); right: 0; background: var(--card) !important; border: 1px solid var(--border); border-radius: 24px; padding: 12px; min-width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); opacity: 0; transform: translateY(10px); pointer-events: none; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 6000; }
+  #user-display-pill.active .pill-menu { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .pill-menu-item { padding: 12px 18px; border-radius: 14px; font-size: 0.85rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; text-decoration: none; }
+  .pill-menu-item:hover { background: rgba(255, 149, 51, 0.1); color: var(--orange); }
+  .pill-menu-item.danger:hover { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+
+  .theme-switch { width: 50px; height: 50px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.4s; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+  .theme-switch svg { width: 24px; height: 24px; transition: 0.4s; }
+  .sun-icon { color: var(--orange); }
+  .moon-icon { color: #8b5cf6; display: none; }
+  body.dark-mode .sun-icon { display: none; }
+  body.dark-mode .moon-icon { display: block; }
+
+  .btn-panel-top { background: var(--orange); color: #fff; border: none; padding: 12px 28px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; cursor: pointer; transition: 0.4s; letter-spacing: 1.5px; box-shadow: 0 8px 25px rgba(255, 149, 51, 0.3); text-transform: uppercase; }
+  .btn-panel-top:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(255, 149, 51, 0.4); }
+
+  .QR{ display:flex; justify-content:center; padding-top: 100px; }
+  .wrap{ width:100%; max-width:1200px; display:grid; grid-template-columns:380px 1fr; gap:28px; }
+
+  .card{ background:var(--card); border:1px solid var(--border); padding:22px; border-radius:14px; }
+  h2{margin:0 0 10px;font-size:20px;font-weight:600; font-family: 'Outfit', sans-serif;}
+
+  label{font-size:13px;color:var(--text-dim);margin-bottom:6px;display:block; font-weight: 600;}
+
+  input[type="text"]{
+    width:100%;padding:12px;border-radius:10px;
+    background:var(--input);border:1px solid var(--border);
+    color:var(--text);font-size:14px;
+  }
+
+  input[type="color"]{
+    -webkit-appearance:none;
+    width:42px;height:42px;border-radius:50%;
+    padding:0;border:none;cursor:pointer;
+    background:transparent;
+  }
+  input[type="color"]::-webkit-color-swatch{
+    border-radius:50%;
+    border:2px solid #222;
+  }
+
+  select{
+    width:100%; padding:12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--input); color:var(--text); font-size:14px;
+  }
+
+  #dropzone{
+    border:2px dashed var(--border); border-radius:14px; padding:32px 12px;
+    text-align:center; font-size:14px; color:var(--text-dim); cursor:pointer; margin-bottom:10px;
+  }
+  #dropzone:hover{border-color:var(--orange)}
+
+  #logo-preview{ width:100px;height:100px;object-fit:contain; display:none; margin:14px auto 0; }
+
+  .btn-primary{
+    background:var(--orange); border:none; padding:12px 18px; border-radius:12px;
+    cursor:pointer; font-weight:600; color:white;
+  }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-outline{
+    background:transparent; border:2px solid var(--orange); padding:12px 18px;
+    border-radius:12px; cursor:pointer; font-weight:600; color:var(--orange);
+  }
+
+  #download:disabled{ opacity:.35; cursor:not-allowed; }
+
+  #preview-area{
+    display:flex; align-items:center; justify-content:center; height:420px;
+    background:var(--input); border-radius:14px; border:1px solid var(--border);
+    padding:20px; position:relative; overflow:hidden;
+  }
+
+  #fakeQR, #realQR{ width:400px; height:400px; position:absolute; }
+
+  #popup {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.7);
+    background: var(--card); border: 2px solid var(--orange); border-radius: 24px;
+    padding: 32px; z-index: 9999; display: none; text-align: center; width: 340px;
+    opacity:0; box-shadow:0 20px 60px rgba(0,0,0,0.2);
+    transition: 0.3s;
+  }
+  #popup.show { display:block; animation: popShow .4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes popShow { 0% { opacity:0; transform:translate(-50%, -50%) scale(.8); } 100% { opacity:1; transform:translate(-50%, -50%) scale(1); } }
+  #popup h3{ margin:0; color:var(--text); font-size:1.1rem; font-weight: 700; line-height: 1.4; text-transform: uppercase; }
+
+  #contrastBar { width:100%; height:16px; background:var(--input); border-radius:12px; overflow:hidden; position:relative; border:1px solid var(--border); }
+  #contrastFill { height:100%; width:0%; transition: width .4s ease, background .4s ease; }
+  #contrastText { margin-top:6px; font-size:13px; text-align:center; color:var(--text-dim); font-weight:500; }
+
+#top-logo-area { width: 100%; text-align: center; padding: 10px 0; margin-bottom: 12px; }
+#top-logo-img { width: 100%; max-width: 240px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(255,149,51,0.15)); }
+
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<div id="top-nav">
+    <div><button class="btn-panel-top" onclick="location.href='index.html'">PANEL</button></div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="theme-switch" id="theme-toggle">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+        <div id="user-display-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; height:20px; color: inherit;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <div class="pill-info">
+                <div id="user-name">&nbsp;</div>
+                <div id="user-role-label">&nbsp;</div>
+            </div>
+            <div class="pill-menu">
+                <a href="index.html" class="pill-menu-item">Home</a>
+                <div class="pill-menu-item danger" onclick="logout()">Logout</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="top-logo-area">
+  <img src="https://menutech.services/assets/img/logomt.png" id="top-logo-img" alt="Logo">
+</div>
+
+
+<div class="QR">
+<div class="wrap">
+
+  <div class="card">
+    <h2>Generador QR</h2>
+
+    <label>ID</label>
+    <input id="customId" type="text">
+
+    <label style="margin-top:16px">Nombre del Restaurante</label>
+    <input id="restaurantName" type="text">
+
+    <label style="margin-top:16px">URL de Destino</label>
+    <input id="urlInput" type="text">
+
+    <label style="margin-top:16px">Color módulos</label>
+    <input id="colorDark" type="color" value="#000000">
+
+    <label style="margin-top:16px">Color fondo</label>
+    <input id="colorLight" type="color" value="#ffffff">
+
+    <label style="margin-top:18px">Logo</label>
+
+    <div id="dropzone">
+        Arrastra tu logo aquí
+        <img id="logo-preview" src="">
+    </div>
+
+    <input id="logoFile" type="file" accept="image/*" style="display:none">
+
+    <label style="margin-top:18px">Estilo de puntos</label>
+    <select id="dotStyle">
+      <option value="square">Bloques cuadrados</option>
+      <option value="rounded">Redondeados</option>
+      <option value="dots">Puntos</option>
+      <option value="classy">Classy</option>
+      <option value="classy-rounded">Classy redondeado</option>
+      <option value="extra-rounded">Extra redondeado</option>
+    </select>
+
+    <div style="display:flex;gap:12px;margin-top:26px">
+      <button class="btn-primary" id="generate">Generar QR</button>
+      <button class="btn-outline" id="download" disabled>Descargar</button>
+    </div>
+
+    <div id="contrastContainer">
+      <div id="contrastLabel">Contraste de legibilidad</div>
+      <div id="contrastBar"><div id="contrastFill"></div></div>
+      <div id="contrastText">—</div>
+    </div>
+
+  </div>
+
+  <div class="card" id="preview-area">
+    <div id="fakeQR"></div>
+    <div id="realQR" style="display:none"></div>
+  </div>
+
+</div>
+</div>
+<div id="popup">
+  <h3></h3>
+</div>
+
+<script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+<script type="module">
+import { MT_CONFIG } from './config.js';
+import { supabase as sb } from './supabase.js';
+
+let currentLogo = null;
+let popupTimeout = null;
+
+async function checkAuth() {
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { location.href = "index.html"; return; }
+
+        const { data: profile } = await sb.from('profiles').select('role, username').eq('id', session.user.id).single();
+
+        if (profile && (profile.role === 'CS' || profile.role === 'adminCS')) {
+            location.href = "index.html";
+            return;
+        }
+
+        const allowedRoles = ['admin', 'developer', 'design', 'adminDesign', 'retention'];
+
+        if (!profile || !allowedRoles.includes(profile.role)) {
+            showPopup("No tienes permiso para usar esta herramienta.");
+            setTimeout(() => {
+                location.href = "index.html";
+            }, 2000);
+        } else {
+            const pill = document.getElementById('user-display-pill');
+            if (pill) {
+                document.getElementById('user-name').textContent = profile.username || session.user.email.split('@')[0];
+                document.getElementById('user-role-label').textContent = profile.role;
+                if (profile.role === 'admin') pill.classList.add('admin-glow');
+                else if (profile.role === 'developer') pill.classList.add('dev-glow');
+            }
+        }
+    } catch (err) {
+        console.error("Auth check failed", err);
+    }
+}
+checkAuth();
+
+function initTheme() {
+    const toggle = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') document.body.classList.add('dark-mode');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+    }
+}
+initTheme();
+
+const pill = document.getElementById('user-display-pill');
+if (pill) {
+    pill.onclick = (e) => { e.stopPropagation(); pill.classList.toggle('active'); };
+    document.addEventListener('click', () => pill.classList.remove('active'));
+}
+window.logout = async () => { await sb.auth.signOut(); location.href = "index.html"; };
+
+/* ==== PREVIEW QR ==== */
+const fakeQR = new QRCodeStyling({
+  width:400, height:400, data:"preview",
+  margin:10,
+  dotsOptions:{color:"#000000", type:"square"},
+  backgroundOptions:{color:"#ffffff"},
+  qrOptions:{errorCorrectionLevel:"H"},
+  imageOptions:{imageSize:0.2, margin:6}
+});
+fakeQR.append(document.getElementById("fakeQR"));
+
+let realQR = null;
+
+/* ==== POPUP ==== */
+function showPopup(msg, persistent = false){
+  if (popupTimeout) clearTimeout(popupTimeout);
+  const popup = document.getElementById("popup");
+  if (!popup) return;
+  popup.querySelector("h3").innerText = msg;
+  popup.classList.add("show");
+
+  if (!persistent) {
+      popupTimeout = setTimeout(()=> popup.classList.remove("show"), 3000);
+  }
+}
+
+/* ======== BARRA DE CONTRASTE ======== */
+function updateContrast(){
+  const dark = document.getElementById("colorDark").value;
+  const light = document.getElementById("colorLight").value;
+
+  const cd = parseInt(dark.replace("#",""),16);
+  const cl = parseInt(light.replace("#",""),16);
+
+  const r1=(cd>>16)&255, g1=(cd>>8)&255, b1=cd&255;
+  const r2=(cl>>16)&255, g2=(cl>>8)&255, b2=cl&255;
+
+  const dist = Math.sqrt(
+    Math.pow(r2-r1,2)+Math.pow(g2-g1,2)+Math.pow(b2-b1,2)
+  );
+
+  const pct = Math.min(100, Math.max(0, (dist/441)*100 ));
+  const fill = document.getElementById("contrastFill");
+  const text = document.getElementById("contrastText");
+
+  if (fill) fill.style.width = pct+"%";
+
+  if (text) {
+      if(pct < 35){
+        fill.style.background = "#c40000";
+        text.innerText = "MALO";
+      }
+      else if(pct < 65){
+        fill.style.background = "#d6b300";
+        text.innerText = "REGULAR";
+      }
+      else{
+        fill.style.background = "#11c26d";
+        text.innerText = "ÓPTIMO";
+      }
+  }
+}
+
+function updateFake(){
+  const urlInp = document.getElementById("urlInput");
+  const dStyle = document.getElementById("dotStyle");
+  const cDark = document.getElementById("colorDark");
+  const cLight = document.getElementById("colorLight");
+
+  fakeQR.update({
+    data: urlInp.value || "preview",
+    dotsOptions:{color:cDark.value, type:dStyle.value},
+    backgroundOptions:{color:cLight.value},
+    image: currentLogo || undefined
+  });
+  updateContrast();
+}
+
+document.querySelectorAll("input,select").forEach(el=>{
+  el.addEventListener("input", updateFake);
+});
+
+/* ==== LOGO ==== */
+const drop = document.getElementById("dropzone");
+const fileInp = document.getElementById("logoFile");
+
+if (drop) {
+    drop.onclick = ()=> fileInp.click();
+    drop.ondragover = e=>{ e.preventDefault(); drop.style.borderColor = "#ff9533"; };
+    drop.ondragleave = ()=> drop.style.borderColor="var(--border)";
+    drop.ondrop = e=>{ e.preventDefault(); loadLogo(e.dataTransfer.files[0]); };
+}
+if (fileInp) fileInp.onchange = e=> loadLogo(e.target.files[0]);
+
+function loadLogo(file){
+  if (!file) return;
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  img.onload = ()=>{
+    currentLogo = img.src;
+    const preview = document.getElementById("logo-preview");
+    if (preview) {
+        preview.style.display = "block";
+        preview.src = img.src;
+    }
+    updateFake();
+  };
+}
+
+async function uploadToCloudinary(blob) {
+  const fd = new FormData();
+  fd.append('file', blob);
+  fd.append('upload_preset', MT_CONFIG.CLOUDINARY.UPLOAD_PRESET);
+  try {
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${MT_CONFIG.CLOUDINARY.CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: fd
+    });
+    if (!res.ok) throw new Error("Cloudinary response not ok");
+    const d = await res.json();
+    return d.secure_url;
+  } catch (e) {
+    console.error("Cloudinary upload error", e);
+    return null;
+  }
+}
+
+async function registrarQR(id, urlReal, restaurantName, qrImageUrl) {
+  const { data: { session } } = await sb.auth.getSession();
+  const userId = session ? session.user.id : null;
+
+  const { error } = await sb.from('qrcodes').insert({
+    id: id,
+    url: urlReal,
+    restaurant_name: restaurantName,
+    qr_image_url: qrImageUrl,
+    user_id: userId,
+    is_active: true
+  });
+
+  if (error) {
+    console.error("Supabase insert error:", error);
+    throw new Error(error.message);
+  }
+}
+
+/* ==== GENERAR ==== */
+const generate = document.getElementById("generate");
+if (generate) {
+    generate.onclick = async () => {
+      const urlInp = document.getElementById("urlInput");
+      const rName = document.getElementById("restaurantName");
+      const cIdInp = document.getElementById("customId");
+      const cDark = document.getElementById("colorDark");
+      const cLight = document.getElementById("colorLight");
+      const dStyle = document.getElementById("dotStyle");
+
+      const url = urlInp.value.trim();
+      const name = rName.value.trim();
+      const cId = cIdInp.value.trim();
+
+      if (!name) { showPopup("Ingresa el nombre del restaurante."); return; }
+      if (!url || !url.startsWith('http')) { showPopup("Ingresa una URL válida."); return; }
+
+      generate.disabled = true;
+      showPopup("Verificando...", true);
+
+      try {
+          let id = cId || crypto.randomUUID().split('-')[0];
+
+          const { data: existing } = await sb.from('qrcodes').select('id').eq('id', id).maybeSingle();
+          if (existing) {
+              throw new Error("ID ya está en uso.");
+          }
+
+          const qrUrl = `https://menutech.io/r.html?id=${encodeURIComponent(id)}`;
+
+          realQR = new QRCodeStyling({
+            width: 400, height: 400, data: qrUrl, margin: 10,
+            dotsOptions: { color: cDark.value, type: dStyle.value },
+            backgroundOptions: { color: cLight.value },
+            qrOptions: { errorCorrectionLevel: "H" },
+            imageOptions: { imageSize: 0.2, margin: 6 },
+            image: currentLogo || undefined
+          });
+
+          const realArea = document.getElementById("realQR");
+          realArea.innerHTML = "";
+          realQR.append(realArea);
+          realArea.style.display = "block";
+
+          const blob = await realQR.getRawData("png");
+          const qrImageUrl = await uploadToCloudinary(blob);
+
+          if (!qrImageUrl) throw new Error("No se pudo subir a la nube.");
+
+          await registrarQR(id, url, name, qrImageUrl);
+
+          showPopup("QR guardado.");
+          document.getElementById("download").disabled = false;
+      } catch (err) {
+          console.error(err);
+          showPopup("Error: " + err.message);
+      } finally {
+          generate.disabled = false;
+      }
+    };
+}
+
+const download = document.getElementById("download");
+if (download) {
+    download.onclick = () => {
+      if (!realQR) {
+        showPopup("Primero genera un QR.");
+        return;
+      }
+      realQR.download({ name: "QR_Menutech", extension: "png" });
+    };
+}
+</script>
+</body>
+</html>
